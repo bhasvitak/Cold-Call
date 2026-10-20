@@ -1,0 +1,38 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Node / Vite
+node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env.local
+frontend/.env.*.local
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local IDE / OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Transcript source material and private analysis — never publish
+*.zip
+*-transcripts*.zip
+transcripts.zip
+cold-call-transcripts*/
+transcripts/
+*_analysis.jsonl
+pilot*.jsonl
+*_review.txt
+*_summary_private.*

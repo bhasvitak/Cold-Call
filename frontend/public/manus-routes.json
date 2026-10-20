@@ -1,0 +1,6 @@
+{
+  "routes": [
+    { "path": "/", "title": "Live Call Guide" },
+    { "path": "/history", "title": "Call History" }
+  ]
+}

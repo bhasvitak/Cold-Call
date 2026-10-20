@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Cold Call Guide mark">
+  <rect x="2" y="2" width="60" height="60" rx="18" fill="#EFF5F3"/>
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#0D6F71" stroke-width="2.5"/>
+  <path d="M23 41 29 25 43 21 39 35 23 41Z" fill="#0D6F71"/>
+  <circle cx="32" cy="32" r="3.2" fill="#EFF5F3"/>
+  <path d="m13 47 6-6" fill="none" stroke="#D3A84E" stroke-width="3" stroke-linecap="round"/>
+</svg>
