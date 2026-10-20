@@ -1,0 +1,4 @@
+# Development and test dependencies (not installed in production)
+-r requirements.txt
+pytest>=8,<9
+httpx2>=2.15,<3
