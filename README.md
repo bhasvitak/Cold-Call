@@ -1,125 +1,175 @@
 # Cold Call Guide — Caller Workstation
 
-A desktop-first cold-call screen kept open beside the dialer during live prospect calls. Built to guide callers through the exact 8-stage cold call structure, grounded in 100 real transcripts of calls to Indian enterprise leaders by Meridian Growth Partners.
+A desktop-first cold-call workspace designed to stay open beside a dialer during prospect calls. It guides callers through eight stages, captures the prospect's words and the caller's notes, records the outcome, and keeps a history of completed calls.
 
-Live free-tier architecture: **Vercel** (Frontend) + **Render** (FastAPI Backend) + **Supabase** (PostgreSQL Data API) + **Google Gemini** (Server-side LLM).
+Use fictional/demo records only. The public demo has no login or user access controls.
 
----
+## Live Deployment
 
-## Live Service URLs & Deployment
+| Component | Technology | URL / Status |
+|---|---|---|
+| Frontend | React + Vite on Vercel | https://cold-call-alpha.vercel.app/ |
+| Backend API | FastAPI on Render | https://cold-call-4azw.onrender.com |
+| Backend health check | FastAPI | https://cold-call-4azw.onrender.com/health |
+| Database | Supabase PostgreSQL | Configured for the deployed backend |
+| Source repository | GitHub | https://github.com/bhasvitak/Cold-Call |
 
-| Service | Target Platform | Status / Live URL |
-| --- | --- | --- |
-| **Frontend Surface** | Vercel (Free Tier) | Pending deployment |
-| **Backend API Health** | Render (Free Tier) | Pending deployment |
-| **PostgreSQL Database** | Supabase (Free Tier) | Apply `database/schema.sql` |
-| **Public GitHub Repo** | GitHub | Public repository |
+The health endpoint currently returns `{"status":"ok"}`. The frontend and backend have been deployed, and a test call was saved to Supabase.
 
----
+## What the App Does
 
-## What It Shows on Screen
+- Guides the caller through eight stages in order: Opening, Purpose, Permission, Their business, Their need (in their words), Objection, Next step, and Close.
+- Shows a short purpose reminder and prospect-response examples for the active stage.
+- Records the selected stage event, prospect words, and notes.
+- Allows a call to end early from any stage.
+- Saves the final outcome and last stage reached.
+- Displays past calls and their saved details.
+- Generates an optional evidence-bound post-call summary using Google Gemini. AI is best-effort and must not block call saving or closing.
 
-Designed from [the structure of a cold call](https://sainikpuri.deepthought.education/fde-hyderabad-v2/structure) and [the reference screen](https://sainikpuri.deepthought.education/fde-hyderabad-v2/reference):
+## The Eight Stages
 
-1. **Active Stage & Purpose**: Shows which stage the caller is in (Stages 1 through 8) and a 1-sentence reminder of what that stage is for.
-2. **"They may say"**: Three realistic prospect response quotes per stage, drawn directly from the 100 real transcripts.
-3. **"What happened"**: 4 quick-tap buttons in a 2x2 grid representing the most frequent real-world paths at that stage. Clicking one immediately records the event without typing.
-4. **"Their words"**: **The only free-text box on the screen**. Captures the prospect's exact words.
-5. **AI Live Stage Suggestion**: While typing in "Their words", the caller can tap **"✨ AI Stage Suggest"** (or receive real-time detection) to identify when a prospect suddenly raises an objection, gives a callback time, or agrees to a meeting, allowing a 1-click jump to the right stage.
-6. **Next Stage & Early End**: A prominent `Next: [Stage Name] →` button and an `End call` button accessible from every single stage (since most cold calls end early).
-7. **Second Screen: Past Calls**: A clean archive matching the reference screen layout, showing each prospect, company, stage reached, timestamp, and the AI-drafted one-line summary.
+| Stage | Name | Purpose |
+|---:|---|---|
+| 1 | Opening | Reach the right person and introduce the reason for the call. |
+| 2 | Purpose | Explain briefly why the caller is contacting the prospect. |
+| 3 | Permission | Establish whether the prospect can talk now or prefers another time. |
+| 4 | Their business | Learn about the prospect's company and operations. |
+| 5 | Their need, in their words | Capture the prospect's stated goals, needs, or challenges. |
+| 6 | Objection | Record and understand the reason for hesitation or refusal. |
+| 7 | Next step | Record a concrete agreed follow-up, if any. |
+| 8 | Close | Confirm the outcome and finish the call clearly. |
 
----
+## LLM Used and Why
 
-## The 8 Stages Grounded in the 100 Transcripts
+**LLM provider:** Google Gemini, called from the FastAPI backend through Google's `google-genai` Python SDK.
 
-| Stage | Name | Purpose | What Happened (4 Taps) |
-|---|---|---|---|
-| **1** | **Opening** | Reach the right person and say who you are. The prospect decides in the first ten seconds whether this call is worth a minute. | `Reached right person`, `Reception / Assistant`, `Busy / In a meeting`, `Wrong number / Left company` |
-| **2** | **Purpose** | Say why you called in one or two sentences the prospect can repeat to a colleague. | `Asked what company does`, `Asked where number came from`, `Guessed it is a sales call`, `Allowed caller to continue` |
-| **3** | **Permission** | Find out whether they are willing to talk now: clear yes, callback, or end. | `Agreed to talk now`, `Requested callback time`, `Asked for WhatsApp first`, `Declined to continue` |
-| **4** | **Their business** | Ask about their company and operations before describing yours. | `Shared operations & capacity`, `Corrected company scope`, `Asked caller to pitch first`, `Guarded / Refused details` |
-| **5** | **Their need, in their words** | Hear what they are trying to do or struggling with, in their own words. | `Stated growth / revenue goal`, `Stated capacity / margin bottleneck`, `Said everything is fine / no need`, `Uncertain / Exploring options` |
-| **6** | **Objection** | Hear the reason for a no and understand it without talking over them. | `Already has agency / consultant`, `Referred to MD / other person`, `Requested written info first`, `Flat refusal / Not interested` |
-| **7** | **Next step** | Agree one concrete thing: WhatsApp document, callback time, or meeting with founder. | `Agreed to Google Meet with founder`, `Agreed to report on WhatsApp`, `Named specific callback time`, `Referred to colleague with contact` |
-| **8** | **Close** | End the call clearly and record the outcome, next step, and prospect's words. | `Confirmed next step & closed warmly`, `Polite close after refusal`, `Call dropped / Abrupt hangup`, `Requested do not call` |
+**What it is used for:** After a call closes, Gemini helps select which captured evidence is most relevant to a concise CRM summary. The application formats the displayed summary from the saved evidence, final outcome, and agreed next step; the model is not asked to invent prospect statements or follow-up commitments.
 
----
+**Why this use case:** Callers need to move quickly between calls and may not have time to write a detailed CRM note. An evidence-bound summary reduces manual note-writing while keeping the record grounded in what was captured.
 
-## The LLM in It: Why We Chose This & What It Does
+**Failure handling:** The AI feature is optional. If the API key is missing, the provider request fails, or the response cannot be validated, call closing and call history should remain usable. The API key is stored only in the Render backend environment and must never be placed in frontend variables or committed to Git.
 
-The backend calls **Google Gemini** (via `google-genai` / Google AI Studio free key) from Render. The API key is kept strictly on the backend.
+The configured model is read from `GEMINI_MODEL` (the current default in the backend is `gemini-3.8-flash`). A live summary has been observed in the deployed app.
 
-### The Problem It Solves
-On a live, fast-moving cold call (averaging 60–90 seconds):
-1. **Mid-Call Stage Detection**: Prospects often jump ahead (e.g. at Stage 2 Purpose, a prospect says: *"We already have an agency in Mumbai handling this, please don't call again"*). The caller types their words and taps **"✨ AI Stage Suggest"**. The LLM immediately detects Stage 6 (Objection: Already has agency) and provides a 1-click `[Jump to Stage 6 →]` button. The caller never loses structure.
-2. **Post-Call 1-Line CRM Summary**: Cold callers must maintain momentum (dialing 50–80 leads a day). They cannot spend 3 minutes typing CRM notes after every call. Upon call close, the LLM analyzes the prospect's recorded words, stages visited, and agreed next steps to draft a crisp, factual 1-line CRM summary (e.g.: *"Kalpana Chem: Dev Sharma confirmed plant capacity at 60%. Agreed to Google Meet next Tuesday after 2 PM with Vikram."*).
+## Architecture
 
----
+- **Frontend:** React 19 and Vite, deployed on Vercel.
+- **Backend:** Python and FastAPI, deployed on Render using Docker.
+- **Database:** Supabase PostgreSQL accessed from the backend using the Supabase client.
+- **LLM:** Google Gemini through `google-genai`, called server-side after call closure.
 
-## FastAPI Backend Endpoints
+## Database Schema
+
+The schema is in [`database/schema.sql`](database/schema.sql). Apply it in the Supabase SQL Editor.
+
+It defines:
+
+- `calls`: prospect/company labels, current and last stage, status, outcome, agreed next step, latest note, timestamps, and optional AI summary.
+- `stage_results`: stage number, selected event, prospect words, notes, call reference, and creation time.
+- Database functions for saving stage results and closing calls atomically.
+
+## FastAPI Endpoints
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| `GET` | `/health` | Health check (`{"status": "ok"}`) for Render liveness |
+| `GET` | `/health` | Health check for deployment verification |
 | `POST` | `/calls` | Start a call record |
-| `POST` | `/calls/{id}/stages` | Append-only stage save (atomic transaction) |
-| `POST` | `/calls/{id}/close` | Save final stage snapshot, outcome, next step, and close |
-| `GET` | `/calls` | List past calls for History screen |
-| `GET` | `/calls/{id}` | Retrieve complete call details and all visited stages |
-| `POST` | `/calls/{id}/summary` | Generate / regenerate 1-line AI summary |
-| `POST` | `/ai/suggest-stage` | Classify prospect words into stage (1–8) and event |
+| `POST` | `/calls/{id}/stages` | Save a stage result |
+| `POST` | `/calls/{id}/close` | Save final-stage data and close a call |
+| `GET` | `/calls` | List calls for the history screen |
+| `GET` | `/calls/{id}` | Retrieve a call and its stage results |
 
----
+Interactive API documentation is available at `https://cold-call-4azw.onrender.com/docs`.
 
-## Database Schema (`database/schema.sql`)
+## Environment Variables
 
-PostgreSQL tables running on Supabase with Row Level Security (RLS) enabled:
-- `calls`: `id` (UUID), `prospect_name`, `company_name`, `current_stage`, `last_stage`, `status` (`in_progress` / `completed`), `outcome` (10 transcript enum values), `agreed_next_step`, `latest_note`, `started_at`, `ended_at`, `ai_summary`.
-- `stage_results`: `id`, `call_id` (FK), `stage_number` (1–8), `event`, `prospect_words`, `notes`, `idempotency_key`, `created_at`.
-- Stored procedures: `save_call_stage_atomic` and `close_call_atomic` guarantee that parent call state and stage snapshots are updated in a single transaction.
+### Render backend
 
----
+Set these in the Render service's Environment settings:
+
+| Variable | Purpose |
+|---|---|
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_SECRET_KEY` | Server-side Supabase key; keep private |
+| `GEMINI_API_KEY` | Optional Google Gemini API key |
+| `GEMINI_MODEL` | Gemini model name |
+| `ALLOWED_ORIGINS` | Comma-separated allowed browser origins; include `https://cold-call-alpha.vercel.app` |
+| `PORT` | Supplied by Render; do not hardcode it in production settings |
+
+### Vercel frontend
+
+Set these for the frontend project:
+
+| Variable | Value |
+|---|---|
+| `VITE_API_BASE_URL` | `https://cold-call-4azw.onrender.com` |
+| `VITE_DEMO_MODE` | `false` |
+
+Never put Supabase or Gemini secret keys in Vercel `VITE_*` variables. All `VITE_*` values are public in the browser bundle.
 
 ## Local Setup
 
-### 1. Backend
+Prerequisites: Node.js, pnpm, Python, and a Supabase project for persistent mode.
+
+### 1. Install frontend dependencies
+
+From the repository root:
+
 ```bash
+pnpm install --frozen-lockfile
+```
+
+### 2. Configure and install the backend
+
+Create a virtual environment and install dependencies:
+
+```powershell
 python -m venv backend/.venv
-backend/.venv/Scripts/pip install -r backend/requirements.txt
-# Copy environment template
-cp backend/.env.example backend/.env
-# Run FastAPI on port 8000
-backend/.venv/Scripts/uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+.\backend\.venv\Scripts\python.exe -m pip install -r backend/requirements.txt
+Copy-Item backend/.env.example backend/.env
 ```
 
-### 2. Frontend
+Edit `backend/.env` with your own Supabase credentials. Do not commit this file.
+
+### 3. Apply the database schema
+
+In Supabase, open **SQL Editor**, create a new query, paste the contents of `database/schema.sql`, and run it.
+
+### 4. Start the backend
+
+From the repository root, run:
+
+```powershell
+.\backend\.venv\Scripts\python.exe -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Verify the health endpoint at `http://127.0.0.1:8000/health`.
+
+### 5. Configure and start the frontend
+
+Create `frontend/.env.local` using `frontend/.env.example` as a reference. For local development, leave `VITE_API_BASE_URL` blank to use the Vite development proxy and set `VITE_DEMO_MODE=false`.
+
+From the repository root:
+
 ```bash
-cd frontend
-npm install
-npm run dev
-# Opens at http://localhost:3000
+pnpm dev:frontend
 ```
 
-### 3. Tests
-```bash
-backend/.venv/Scripts/pytest backend/tests
-npm run build --prefix frontend
+Open `http://localhost:3000`.
+
+## Tests and Build
+
+From the repository root:
+
+```powershell
+.\backend\.venv\Scripts\python.exe -m pytest backend/tests -q
+pnpm --dir frontend build
 ```
 
----
+## Security and Privacy Notes
 
-## 6-Minute Video Walkthrough Guide (For Candidate)
-
-When recording your 6-minute unscripted video with your camera on:
-1. **Show the screen beside you**: Explain that this is the caller's workstation, designed to be kept open during live calls for Meridian Growth Partners.
-2. **Select a real transcript**: Click sample chip **T001 (Dev Sharma, Kalpana Chem Supplies)** or **T010 (Vinod Nair, ChromaChem India)**.
-3. **Walk through the stages**:
-   - Stage 1 Opening: Highlight the live timer ticking, prospect details, and tap `Reached right person`.
-   - Stage 2 Purpose: Show "They may say" quotes. Type what the prospect said into "Their words".
-   - Demonstrate the LLM: Click **"✨ AI Stage Suggest"** to show how the model classifies the objection/next step and allows 1-click stage jumping.
-   - Stage 7 Next step: Tap `Agreed to Google Meet with founder`.
-   - End Call: Open modal, confirm outcome (`next_step_agreed`), enter `Google Meet next Tuesday after 2 PM with Vikram`, and save.
-4. **Show the Post-Call Summary**: Point to the AI 1-line CRM summary generated automatically.
-5. **Open Second Screen (Past Calls)**: Show how completed calls appear in the archive with stage reached and timestamp, matching Reading 2.
-6. **Explain your decision and what you left out**: Explain why the LLM was given this specific role (cognitive offloading + CRM speed) and why you left out complex CRM forms during the call to keep the caller focused on listening.
+- The public demo has no authentication or user access controls. Use fictional/demo records only.
+- Keep `backend/.env` and all real API keys out of GitHub.
+- If a key has been exposed, revoke or rotate it in the provider dashboard.
+- Do not publish private source transcripts, direct quotes, transcript IDs, names, contact details, or per-call analysis. Public materials should contain only authorized, non-identifying examples and high-level patterns.
+- Confirm the repository's sharing permissions and authorization before making private source material public.
