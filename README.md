@@ -81,31 +81,50 @@ It defines:
 
 Interactive API documentation is available at `https://cold-call-4azw.onrender.com/docs`.
 
-## Environment Variables
+## Deployment Status and Environment Configuration Guide
 
-### Render backend
+This section serves two purposes:
 
-Set these in the Render service's Environment settings:
+1. **Deployment status:** records where the currently deployed application is hosted.
+2. **Configuration guide:** explains which environment variables are needed if the project is redeployed or run locally.
 
-| Variable | Purpose |
-|---|---|
-| `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_SECRET_KEY` | Server-side Supabase key; keep private |
-| `GEMINI_API_KEY` | Optional Google Gemini API key |
-| `GEMINI_MODEL` | Gemini model name |
-| `ALLOWED_ORIGINS` | Comma-separated allowed browser origins; include `https://cold-call-alpha.vercel.app` |
-| `PORT` | Supplied by Render; do not hardcode it in production settings |
+The public deployment is:
 
-### Vercel frontend
+- **Frontend:** https://cold-call-alpha.vercel.app/
+- **Backend:** https://cold-call-4azw.onrender.com
+- **Health check:** https://cold-call-4azw.onrender.com/health
+- **API documentation:** https://cold-call-4azw.onrender.com/docs
 
-Set these for the frontend project:
+The backend health endpoint has been verified to return `{"status":"ok"}`. The deployed app has also been observed saving a call to Supabase and displaying an AI summary.
 
-| Variable | Value |
-|---|---|
-| `VITE_API_BASE_URL` | `https://cold-call-4azw.onrender.com` |
-| `VITE_DEMO_MODE` | `false` |
+### Render Backend — Deployment Configuration
 
-Never put Supabase or Gemini secret keys in Vercel `VITE_*` variables. All `VITE_*` values are public in the browser bundle.
+These variables belong in the Render service's **Environment** settings. Values are deliberately not included here because credentials must remain private.
+
+| Variable | Purpose | What to do |
+|---|---|---|
+| `SUPABASE_URL` | Supabase project URL | Set in Render; use your own project URL |
+| `SUPABASE_SECRET_KEY` | Server-side Supabase access | Set in Render; never expose it in frontend code |
+| `GEMINI_API_KEY` | Google Gemini API access | Set in Render if using the AI feature |
+| `GEMINI_MODEL` | Selects the Gemini model | Set in Render to a model supported by your API key |
+| `ALLOWED_ORIGINS` | Browser origins allowed to call the API | Include `https://cold-call-alpha.vercel.app`; add local origins only if needed |
+| `PORT` | Runtime port | Render supplies this; do not hardcode a production port |
+
+**For an existing deployment:** open the Render service's Environment page and verify the variables above. Only add or change a variable if it is missing or incorrect. Save changes and wait for the service to return to **Live**.
+
+### Vercel Frontend — Deployment Configuration
+
+These variables belong in the Vercel project's **Settings → Environment Variables**:
+
+| Variable | Value | Purpose |
+|---|---|---|
+| `VITE_API_BASE_URL` | `https://cold-call-4azw.onrender.com` | Points the frontend to the deployed backend |
+| `VITE_DEMO_MODE` | `false` | Uses the live backend instead of demo mode |
+
+If either Vercel variable is changed, redeploy the frontend for the change to take effect.
+
+**Security:** Never place `SUPABASE_SECRET_KEY` or `GEMINI_API_KEY` in Vercel `VITE_*` variables. Variables prefixed with `VITE_` are included in the browser bundle and are public. Never commit `.env` files or secrets to GitHub. Rotate any key that has been exposed.
+
 
 ## Local Setup
 
