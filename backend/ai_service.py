@@ -155,7 +155,7 @@ def generate_summary(
                 f"Return JSON matching: {{\"selected_evidence_ids\": [list of IDs from {evidence_ids}]}}"
             )
             response = client.models.generate_content(
-                model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
+                model=os.getenv("GEMINI_MODEL", DEFAULT_MODEL),
                 contents=prompt,
                 config={"response_mime_type": "application/json"},
             )
@@ -227,7 +227,7 @@ def suggest_stage_from_words(words: str, current_stage: int | None = None) -> di
                 '{"suggested_stage": int (1-8), "suggested_event": "short_label", "confidence": "high"|"medium", "reason": "one concise sentence"}'
             )
             response = client.models.generate_content(
-                model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
+                model=os.getenv("GEMINI_MODEL", DEFAULT_MODEL),
                 contents=prompt,
                 config={"response_mime_type": "application/json"},
             )
