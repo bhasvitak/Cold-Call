@@ -192,7 +192,7 @@ function readDemoCalls() {
   try {
     const raw = localStorage.getItem(DEMO_KEY)
     if (raw) return JSON.parse(raw)
-  } catch {}
+  } catch { }
   return [
     {
       id: 'demo-1',
@@ -241,7 +241,7 @@ function readDemoCalls() {
 function writeDemoCalls(calls) {
   try {
     localStorage.setItem(DEMO_KEY, JSON.stringify(calls))
-  } catch {}
+  } catch { }
 }
 
 function normalizeCall(call = {}) {
@@ -1189,7 +1189,7 @@ function HistoryScreen({ onStartCall }) {
           <span className="card-badge">SECOND SCREEN · PAST CALLS</span>
           <h1 className="history-title">Call Records & Outcomes</h1>
           <p className="history-subtitle">
-            A list like this is how a caller sees where their calls end. Review prospect words and agreed next steps.
+            A list of calls for the caller to see where their calls end. Review prospect words and agreed next steps.
           </p>
         </div>
         <button type="button" className="btn btn-primary" onClick={onStartCall}>
